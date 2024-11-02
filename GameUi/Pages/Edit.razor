@@ -1,0 +1,93 @@
+﻿@page "/edit/{GameId:int}"
+@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+@using GameUi.Models
+@code
+{
+    [Parameter]
+    public int GameId { get; set; }
+    public Game CurrentGame { get; set; } = new Game();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGame();
+    }
+
+    private async Task LoadGame()
+    {
+        // Fetch the game by its ID to pre-populate the form fields
+        CurrentGame = await HttpClient.GetFromJsonAsync<Game>($"http://localhost:5072/api/Game/{GameId}");
+    }
+
+    private async Task UpdateGame()
+    {
+        // Send a PUT request with the updated game details
+        var response = await HttpClient.PutAsJsonAsync("http://localhost:5072/api/Game", CurrentGame);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Redirect back to the home page after a successful update
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            Console.WriteLine("Error updating game.");
+        }
+    }
+
+    private void CancelUpdate()
+    {
+        // Redirect back to the home page or any other page
+        Navigation.NavigateTo("/");
+    }
+}
+
+<h3 class="text-center mt-4">Update Game Details</h3>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 p-4 bg-light rounded shadow-sm">
+            <form>
+                <div class="mb-3">
+                    <label for="gameName" class="form-label fw-bold">Game Name</label>
+                    <input type="text" class="form-control" id="gameName" @bind="CurrentGame.GameName" placeholder="Enter game name" />
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label fw-bold">Price</label>
+                    <input type="number" class="form-control" id="price" @bind="CurrentGame.Price" placeholder="Enter game price" />
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-primary btn-lg" @onclick="UpdateGame">Update Game</button>
+                    <button type="button" class="btn btn-secondary btn-lg" @onclick="CancelUpdate">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        margin-top: 50px;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .form-label {
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>

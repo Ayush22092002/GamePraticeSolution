@@ -1,0 +1,44 @@
+﻿@page "/addgame"
+@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+@using GameUi.Models
+
+<h3>Add New Game</h3>
+
+<div class="container my-5">
+    <div class="mb-3">
+        <label for="gameName" class="form-label">Game Name</label>
+        <input type="text" class="form-control" id="gameName" @bind="NewGame.GameName" />
+    </div>
+
+    <div class="mb-3">
+        <label for="price" class="form-label">Price</label>
+        <input type="number" class="form-control" id="price" @bind="NewGame.Price" />
+    </div>
+
+    <button class="btn btn-success" @onclick="AddGame">Add Game</button>
+    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</div>
+
+@code {
+    public Game NewGame { get; set; } = new Game();
+
+    private async Task AddGame()
+    {
+        var response = await HttpClient.PostAsJsonAsync("http://localhost:5072/api/Game", NewGame);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            Console.WriteLine("Error adding game.");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
